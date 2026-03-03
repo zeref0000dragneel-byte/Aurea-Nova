@@ -70,7 +70,7 @@ export default async function AdminProduccionPage({
 
   const { data: orders, error } = await query
 
-  const orderList = (orders ?? []) as ProductionOrderRow[]
+  const orderList = (orders ?? []) as unknown as ProductionOrderRow[]
   const hasOrders = orderList.length > 0
 
   const filterLinks: { value: FilterValue; label: string }[] = [

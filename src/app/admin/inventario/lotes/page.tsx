@@ -66,7 +66,7 @@ export default async function AdminInventarioLotesPage({
     .select('*, products(name, unit)')
     .order('production_date', { ascending: true })
 
-  const allLots = (lots ?? []) as LotRow[]
+  const allLots = (lots ?? []) as unknown as LotRow[]
   const filteredLots = productId ? allLots.filter((l) => l.product_id === productId) : allLots
 
   const productOptions = Array.from(

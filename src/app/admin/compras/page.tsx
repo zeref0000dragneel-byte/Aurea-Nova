@@ -83,7 +83,7 @@ export default async function AdminComprasPage({
       .order('created_at', { ascending: false }),
   ])
 
-  let purchases = (purchasesData ?? []) as PurchaseRow[]
+  let purchases = (purchasesData ?? []) as unknown as PurchaseRow[]
 
   if (statusFilter === 'pendientes') {
     purchases = purchases.filter((p) => (p.reception_status ?? 'pendiente') === 'pendiente')
@@ -95,7 +95,7 @@ export default async function AdminComprasPage({
     purchases = purchases.filter((p) => p.reception_status === 'cancelado')
   }
 
-  const allPurchases = (purchasesData ?? []) as PurchaseRow[]
+  const allPurchases = (purchasesData ?? []) as unknown as PurchaseRow[]
   const pendientesRecibirCount = allPurchases.filter(
     (p) => (p.reception_status ?? 'pendiente') === 'pendiente'
   ).length

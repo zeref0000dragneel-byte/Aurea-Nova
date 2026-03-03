@@ -77,8 +77,8 @@ export default async function AdminDashboardPage() {
 
   const mpEnAlerta = (rawMaterialsData ?? []).filter(
     (mp: RawMaterialRow) => mp.current_stock <= mp.min_stock
-  ) as RawMaterialRow[]
-  const lotesPorVencer = (lotsExpiringData ?? []) as LotRow[]
+  ) as unknown as RawMaterialRow[]
+  const lotesPorVencer = (lotsExpiringData ?? []) as unknown as LotRow[]
 
   const deudaProveedores = (purchasesDeudaData ?? []).reduce(
     (sum: number, p: { total: number; paid_amount: number }) =>

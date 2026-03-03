@@ -62,7 +62,7 @@ export default async function ClientePreciosPage() {
     preciosMap.set(p.product_id, p as CustomerPriceRow)
   }
 
-  const productosList = (productos ?? []) as ProductRow[]
+  const productosList = (productos ?? []) as unknown as ProductRow[]
   const items: Array<{
     id: string
     name: string

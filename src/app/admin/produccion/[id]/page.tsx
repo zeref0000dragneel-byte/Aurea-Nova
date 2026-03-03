@@ -96,13 +96,13 @@ export default async function OrdenProduccionDetallePage({
     notFound()
   }
 
-  const orden = order as OrderData
-  const consumosList = (consumos ?? []) as ConsumoRow[]
+  const orden = order as unknown as OrderData
+  const consumosList = (consumos ?? []) as unknown as ConsumoRow[]
   const materiasPrimas = (rawMaterials ?? []).map((r) => ({
     id: (r as { id: string }).id,
     name: (r as { name: string }).name,
     unit: (r as { unit: string }).unit,
-  })) as RawMaterialOption[]
+  })) as unknown as RawMaterialOption[]
 
   const productName = orden.products?.name ?? '—'
   const assignedName = orden.assigned_profile?.full_name ?? 'Sin asignar'

@@ -74,7 +74,7 @@ export default async function CompraDetallePage({
   }
 
   const compra = purchase as unknown as PurchaseData
-  const pagos = (paymentsData ?? []) as PaymentRow[]
+  const pagos = (paymentsData ?? []) as unknown as PaymentRow[]
 
   return (
     <div className="p-8">

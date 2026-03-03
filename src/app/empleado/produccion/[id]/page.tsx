@@ -136,7 +136,7 @@ export default async function EmpleadoOrdenProduccionDetallePage({
     id: (r as { id: string }).id,
     name: (r as { name: string }).name,
     unit: (r as { unit: string }).unit,
-  })) as RawMaterialOption[]
+  })) as unknown as RawMaterialOption[]
 
   const productName = orden.products?.name ?? '—'
   const assignedName = orden.profiles?.full_name ?? '—'
