@@ -73,7 +73,7 @@ export default async function CompraDetallePage({
     notFound()
   }
 
-  const compra = purchase as PurchaseData
+  const compra = purchase as unknown as PurchaseData
   const pagos = (paymentsData ?? []) as PaymentRow[]
 
   return (
