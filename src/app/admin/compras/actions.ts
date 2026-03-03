@@ -203,7 +203,7 @@ export async function registrarRecepcion(
   const purchase_id = (formData.get('purchase_id') as string)?.trim()
   const received_quantityStr = (formData.get('received_quantity') as string)?.trim()
   const reception_notes = (formData.get('reception_notes') as string)?.trim() || null
-  const reception_status = (formData.get('reception_status') as string)?.trim() as
+  const _reception_status = (formData.get('reception_status') as string)?.trim() as
     | 'recibido_completo'
     | 'recibido_parcial'
     | ''

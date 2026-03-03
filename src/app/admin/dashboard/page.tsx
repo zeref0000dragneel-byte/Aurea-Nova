@@ -97,11 +97,6 @@ export default async function AdminDashboardPage() {
     0
   )
   const comprasDelMes = purchasesMesData ?? []
-  const comprasDelMesCount = comprasDelMes.length
-  const comprasDelMesTotal = comprasDelMes.reduce(
-    (sum: number, p: { total: number }) => sum + Number(p.total),
-    0
-  )
 
   const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
   const lotesVencenEn7Dias = lotesPorVencer.filter(
