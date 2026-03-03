@@ -390,62 +390,63 @@ export default function DetallePedido({
           </Card>
 
           {/* Sección 3 — Registrar abono */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Registrar abono</h2>
-            </CardHeader>
-            <CardContent>
-              <form action={pagoFormAction} className="space-y-4">
-                <input type="hidden" name="order_id" value={order.id} />
-                <input type="hidden" name="customer_id" value={order.customer_id} />
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Monto *</Label>
-                  <Input
-                    id="amount"
-                    name="amount"
-                    type="number"
-                    required
-                    min="0.01"
-                    step="0.01"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="payment_method">Método de pago</Label>
-                  <select
-                    id="payment_method"
-                    name="payment_method"
-                    required
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="">Seleccionar...</option>
-                    {PAYMENT_METHODS.map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reference">Referencia (opcional)</Label>
-                  <Input
-                    id="reference"
-                    name="reference"
-                    type="text"
-                    placeholder="No. transferencia, cheque, etc."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notas (opcional)</Label>
-                  <Input id="notes" name="notes" type="text" />
-                </div>
-                <BotonRegistrarPago />
-                {pagoState?.error && (
-                  <p className="text-destructive text-sm">{pagoState.error}</p>
-                )}
-                {pagoState?.success && (
-                  <p className="text-green-600 text-sm font-medium">Pago registrado correctamente</p>
-                )}
+          {order.status !== 'cancelado' && (
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold">Registrar abono</h2>
+              </CardHeader>
+              <CardContent>
+                <form action={pagoFormAction} className="space-y-4">
+                  <input type="hidden" name="order_id" value={order.id} />
+                  <input type="hidden" name="customer_id" value={order.customer_id} />
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">Monto *</Label>
+                    <Input
+                      id="amount"
+                      name="amount"
+                      type="number"
+                      required
+                      min="0.01"
+                      step="0.01"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="payment_method">Método de pago</Label>
+                    <select
+                      id="payment_method"
+                      name="payment_method"
+                      required
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      <option value="">Seleccionar...</option>
+                      {PAYMENT_METHODS.map((m) => (
+                        <option key={m.value} value={m.value}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reference">Referencia (opcional)</Label>
+                    <Input
+                      id="reference"
+                      name="reference"
+                      type="text"
+                      placeholder="No. transferencia, cheque, etc."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Notas (opcional)</Label>
+                    <Input id="notes" name="notes" type="text" />
+                  </div>
+                  <BotonRegistrarPago />
+                  {pagoState?.error && (
+                    <p className="text-destructive text-sm">{pagoState.error}</p>
+                  )}
+                  {pagoState?.success && (
+                    <p className="text-green-600 text-sm font-medium">Pago registrado correctamente</p>
+                  )}
               </form>
 
               {pagos.length > 0 && (
@@ -483,6 +484,7 @@ export default function DetallePedido({
               )}
             </CardContent>
           </Card>
+          )}
         </div>
       </div>
     </div>

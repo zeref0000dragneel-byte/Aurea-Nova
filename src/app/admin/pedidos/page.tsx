@@ -128,7 +128,6 @@ export default async function PedidosPage({
             </thead>
             <tbody className="divide-y">
               {pedidos.map((pedido: PedidoRow) => {
-                const deuda = Number(pedido.total) - Number(pedido.paid_amount)
                 return (
                   <tr key={pedido.id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-3 font-mono text-xs font-medium">
@@ -151,12 +150,14 @@ export default async function PedidosPage({
                       ${Number(pedido.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="p-3 text-right">
-                      {deuda > 0 ? (
-                        <span className="text-destructive font-medium">
-                          ${deuda.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                        </span>
-                      ) : (
+                      {pedido.status === 'cancelado' ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : pedido.payment_status === 'pagado' ? (
                         <span className="text-green-600 font-medium">Pagado</span>
+                      ) : (
+                        <span className="text-destructive font-medium">
+                          ${(Number(pedido.total) - Number(pedido.paid_amount)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
                       )}
                     </td>
                     <td className="p-3 text-muted-foreground">
