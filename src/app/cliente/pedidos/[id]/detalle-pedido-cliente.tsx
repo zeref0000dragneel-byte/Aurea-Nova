@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { confirmarEntregaCliente, type ConfirmarEntregaState } from './actions'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,15 @@ import {
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { CheckCircle } from 'lucide-react'
+
+function BotonConfirmarRecepcion() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={pending}>
+      {pending ? 'Confirmando...' : 'Confirmar que lo recibí'}
+    </Button>
+  )
+}
 
 const statusLabel: Record<string, string> = {
   borrador: 'Borrador',
@@ -260,9 +269,7 @@ export default function DetallePedidoCliente({
           <CardContent>
             <form action={formAction}>
               <input type="hidden" name="order_id" value={order.id} />
-              <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                Confirmar que lo recibí
-              </Button>
+              <BotonConfirmarRecepcion />
             </form>
             {state?.error && (
               <p className="text-destructive text-sm mt-2">{state.error}</p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -19,6 +19,19 @@ const UNITS = [
   { value: 'caja', label: 'caja' },
   { value: 'cubeta', label: 'cubeta' },
 ] as const
+
+function BotonGuardarProducto() {
+  const { pending } = useFormStatus()
+  return (
+    <Button
+      type="submit"
+      className="bg-amber-500 font-medium text-white hover:bg-amber-600"
+      disabled={pending}
+    >
+      {pending ? 'Guardando...' : 'Guardar producto'}
+    </Button>
+  )
+}
 
 export function FormProductoNuevo({
   categories,
@@ -157,12 +170,7 @@ export function FormProductoNuevo({
           </select>
         </div>
       </div>
-      <Button
-        type="submit"
-        className="bg-amber-500 font-medium text-white hover:bg-amber-600"
-      >
-        Guardar producto
-      </Button>
+      <BotonGuardarProducto />
     </form>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import { crearPedido } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +17,7 @@ interface Producto {
   unit: string
   base_price: number
   sku: string
+  stock_disponible: number
 }
 
 interface Cliente {
@@ -31,6 +32,22 @@ interface CartItem {
   unit: string
   quantity: number
   base_price: number
+}
+
+function BotonCrearPedido({
+  disabledWhen,
+}: {
+  disabledWhen: boolean
+}) {
+  const { pending } = useFormStatus()
+  return (
+    <Button
+      type="submit"
+      disabled={pending || disabledWhen}
+    >
+      {pending ? 'Creando...' : 'Crear Pedido'}
+    </Button>
+  )
 }
 
 export default function FormNuevoPedido({
@@ -128,7 +145,7 @@ export default function FormNuevoPedido({
                 <SelectItem key={p.id} value={p.id}>
                   {p.name}
                   <span className="text-muted-foreground ml-2 text-xs">
-                    ${Number(p.base_price).toLocaleString('es-MX')} / {p.unit}
+                    ${Number(p.base_price).toLocaleString('es-MX')} / {p.unit} — Stock: {p.stock_disponible}
                   </span>
                 </SelectItem>
               ))}
@@ -157,6 +174,18 @@ export default function FormNuevoPedido({
             <Plus className="w-4 h-4" />
           </Button>
         </div>
+        {productoId && (() => {
+          const prod = productos.find(p => p.id === productoId)
+          if (!prod) return null
+          const enCarrito = cart.find(i => i.product_id === productoId)?.quantity ?? 0
+          const totalSolicitado = enCarrito + (Number(cantidad) || 0)
+          if (totalSolicitado <= prod.stock_disponible) return null
+          return (
+            <p className="text-sm text-destructive">
+              Stock disponible: {prod.stock_disponible} unidades
+            </p>
+          )
+        })()}
 
         {/* Carrito */}
         {cart.length === 0 ? (
@@ -248,9 +277,7 @@ export default function FormNuevoPedido({
       </div>
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={cart.length === 0 || !clienteId}>
-          Crear Pedido
-        </Button>
+        <BotonCrearPedido disabledWhen={cart.length === 0 || !clienteId} />
         <Button type="button" variant="outline" asChild>
           <Link href="/admin/pedidos">Cancelar</Link>
         </Button>

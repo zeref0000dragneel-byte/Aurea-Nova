@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,6 +20,19 @@ type Customer = {
   credit_limit: number
   notes: string | null
   is_active: boolean
+}
+
+function BotonGuardarClienteEditar() {
+  const { pending } = useFormStatus()
+  return (
+    <Button
+      type="submit"
+      className="bg-amber-500 font-medium text-white hover:bg-amber-600"
+      disabled={pending}
+    >
+      {pending ? 'Guardando...' : 'Guardar cambios'}
+    </Button>
+  )
 }
 
 export function FormClienteEditar({ customer }: { customer: Customer }) {
@@ -151,12 +164,7 @@ export function FormClienteEditar({ customer }: { customer: Customer }) {
           </select>
         </div>
       </div>
-      <Button
-        type="submit"
-        className="bg-amber-500 font-medium text-white hover:bg-amber-600"
-      >
-        Guardar cambios
-      </Button>
+      <BotonGuardarClienteEditar />
     </form>
   )
 }

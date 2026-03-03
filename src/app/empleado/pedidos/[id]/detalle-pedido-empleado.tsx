@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { actualizarEstadoPedido } from '@/app/admin/pedidos/actions'
 import { confirmarEntregaEmpleado } from './actions'
@@ -16,6 +16,24 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+
+function BotonActualizarEstado() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Actualizando...' : 'Actualizar Estado'}
+    </Button>
+  )
+}
+
+function BotonConfirmarEntrega() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? 'Confirmando...' : 'Confirmar entrega'}
+    </Button>
+  )
+}
 
 const statusLabel: Record<string, string> = {
   confirmado: 'Confirmado',
@@ -205,7 +223,7 @@ export default function DetallePedidoEmpleado({
                   ))}
                 </select>
               </div>
-              <Button type="submit">Actualizar Estado</Button>
+              <BotonActualizarEstado />
             </form>
           )}
           {statusState?.error && (
@@ -224,9 +242,7 @@ export default function DetallePedidoEmpleado({
           <CardContent>
             <form action={confirmFormAction}>
               <input type="hidden" name="order_id" value={order.id} />
-              <Button type="submit" className="w-full">
-                Confirmar entrega
-              </Button>
+              <BotonConfirmarEntrega />
             </form>
             {confirmState?.error && (
               <p className="text-destructive text-sm mt-2">{confirmState.error}</p>

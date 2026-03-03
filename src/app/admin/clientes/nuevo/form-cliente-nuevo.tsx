@@ -1,12 +1,25 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { crearCliente } from '../actions'
 import { cn } from '@/lib/utils'
+
+function BotonGuardarCliente() {
+  const { pending } = useFormStatus()
+  return (
+    <Button
+      type="submit"
+      className="bg-amber-500 font-medium text-white hover:bg-amber-600"
+      disabled={pending}
+    >
+      {pending ? 'Guardando...' : 'Guardar cliente'}
+    </Button>
+  )
+}
 
 export function FormClienteNuevo() {
   const [state, formAction] = useFormState(crearCliente, null)
@@ -129,12 +142,7 @@ export function FormClienteNuevo() {
           </select>
         </div>
       </div>
-      <Button
-        type="submit"
-        className="bg-amber-500 font-medium text-white hover:bg-amber-600"
-      >
-        Guardar cliente
-      </Button>
+      <BotonGuardarCliente />
     </form>
   )
 }

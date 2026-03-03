@@ -9,17 +9,20 @@ import {
   Users,
   ShoppingCart,
   Settings,
-  LogOut,
+  ShoppingBag,
 } from 'lucide-react'
 import { logoutAction } from '@/app/(auth)/login/actions'
+import { BotonCerrarSesion } from '@/components/boton-cerrar-sesion'
 
 const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/finanzas', icon: TrendingUp, label: 'Finanzas' },
   { href: '/admin/productos', icon: Package, label: 'Productos' },
   { href: '/admin/inventario', icon: Warehouse, label: 'Inventario' },
+  { href: '/admin/compras', icon: ShoppingBag, label: 'Compras' },
   { href: '/admin/produccion', icon: Factory, label: 'Producción' },
   { href: '/admin/clientes', icon: Users, label: 'Clientes' },
+  { href: '/admin/usuarios', icon: Users, label: 'Usuarios' },
   { href: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
   { href: '/admin/configuracion', icon: Settings, label: 'Configuración' },
 ] as const
@@ -54,13 +57,7 @@ export default function AdminLayout({
         </nav>
         <div className="border-t border-gray-200 p-3">
           <form action={logoutAction}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-            >
-              <LogOut className="h-5 w-5 shrink-0" />
-              Cerrar sesión
-            </button>
+            <BotonCerrarSesion className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50" />
           </form>
         </div>
       </aside>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Factory, AlertTriangle, Package, Clock } from 'lucide-react'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { Factory, AlertTriangle, Package, Clock, TrendingDown, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
@@ -31,15 +32,20 @@ type LotRow = {
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
+  const supabaseAdmin = createAdminClient()
 
   const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
   const todayStart = new Date().toISOString()
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
 
   const [
     { count: ordersActiveCount },
     { data: rawMaterialsData },
     { data: lotsExpiringData },
     { count: lotsInStockCount },
+    { data: purchasesDeudaData },
+    { data: ordersPorCobrarData },
+    { data: purchasesMesData },
   ] = await Promise.all([
     supabase
       .from('production_orders')
@@ -60,12 +66,47 @@ export default async function AdminDashboardPage() {
       .from('inventory_lots')
       .select('id', { count: 'exact', head: true })
       .gt('current_quantity', 0),
+    supabaseAdmin
+      .from('purchases')
+      .select('total, paid_amount')
+      .in('payment_status', ['pendiente', 'parcial']),
+    supabaseAdmin
+      .from('orders')
+      .select('total, paid_amount')
+      .neq('payment_status', 'pagado')
+      .neq('status', 'cancelado'),
+    supabaseAdmin
+      .from('purchases')
+      .select('id, total')
+      .gte('created_at', startOfMonth),
   ])
 
   const mpEnAlerta = (rawMaterialsData ?? []).filter(
     (mp: RawMaterialRow) => mp.current_stock <= mp.min_stock
   ) as RawMaterialRow[]
   const lotesPorVencer = (lotsExpiringData ?? []) as LotRow[]
+
+  const deudaProveedores = (purchasesDeudaData ?? []).reduce(
+    (sum: number, p: { total: number; paid_amount: number }) =>
+      sum + (Number(p.total) - Number(p.paid_amount)),
+    0
+  )
+  const deudaClientes = (ordersPorCobrarData ?? []).reduce(
+    (sum: number, p: { total: number; paid_amount: number }) =>
+      sum + (Number(p.total) - Number(p.paid_amount)),
+    0
+  )
+  const comprasDelMes = purchasesMesData ?? []
+  const comprasDelMesCount = comprasDelMes.length
+  const comprasDelMesTotal = comprasDelMes.reduce(
+    (sum: number, p: { total: number }) => sum + Number(p.total),
+    0
+  )
+
+  const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const lotesVencenEn7Dias = lotesPorVencer.filter(
+    (l) => l.expiry_date != null && l.expiry_date <= sevenDaysFromNow
+  )
 
   const ordersCount = ordersActiveCount ?? 0
   const mpAlertaCount = mpEnAlerta.length
@@ -254,6 +295,121 @@ export default async function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Resumen Financiero */}
+      <div className="mb-10">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Resumen Financiero</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card
+            className={cn(
+              'border-gray-200',
+              deudaProveedores > 0 ? 'border-red-200 bg-red-50/30' : 'border-emerald-200 bg-emerald-50/30'
+            )}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-lg',
+                    deudaProveedores > 0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'
+                  )}
+                >
+                  <TrendingDown className="h-5 w-5" />
+                </div>
+                <div>
+                  {deudaProveedores > 0 ? (
+                    <p className="text-2xl font-bold text-red-600">
+                      ${deudaProveedores.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </p>
+                  ) : (
+                    <p className="text-lg font-semibold text-emerald-700">Al día</p>
+                  )}
+                  <p className="text-xs font-medium text-gray-500">Deuda con Proveedores</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card
+            className={cn(
+              'border-gray-200',
+              deudaClientes > 0 ? 'border-red-200 bg-red-50/30' : 'border-emerald-200 bg-emerald-50/30'
+            )}
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-lg',
+                    deudaClientes > 0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'
+                  )}
+                >
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div>
+                  {deudaClientes > 0 ? (
+                    <p className="text-2xl font-bold text-red-600">
+                      ${deudaClientes.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </p>
+                  ) : (
+                    <p className="text-lg font-semibold text-emerald-700">Sin deuda</p>
+                  )}
+                  <p className="text-xs font-medium text-gray-500">Por Cobrar a Clientes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Alertas Operativas */}
+      {(deudaProveedores > 0 || mpEnAlerta.length > 0 || lotesVencenEn7Dias.length > 0) && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">Alertas Operativas</h2>
+          {deudaProveedores > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-medium text-amber-800">
+                Tienes deuda pendiente con proveedores por $
+                {deudaProveedores.toLocaleString('es-MX', { minimumFractionDigits: 2 })}.{' '}
+                <Link
+                  href="/admin/compras"
+                  className="font-semibold underline hover:no-underline"
+                >
+                  Ve a Compras
+                </Link>{' '}
+                para registrar pagos.
+              </p>
+            </div>
+          )}
+          {mpEnAlerta.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm font-medium text-red-800">
+                {mpEnAlerta.length} materia{mpEnAlerta.length === 1 ? '' : 's'} prima
+                {mpEnAlerta.length === 1 ? ' está' : 's están'} bajo el stock mínimo.{' '}
+                <Link
+                  href="/admin/inventario"
+                  className="font-semibold underline hover:no-underline"
+                >
+                  Ver Inventario
+                </Link>
+              </p>
+            </div>
+          )}
+          {lotesVencenEn7Dias.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm font-medium text-red-800">
+                {lotesVencenEn7Dias.length} lote{lotesVencenEn7Dias.length === 1 ? '' : 's'}{' '}
+                vence{lotesVencenEn7Dias.length === 1 ? '' : 'n'} en menos de 7 días.{' '}
+                <Link
+                  href="/admin/inventario/lotes"
+                  className="font-semibold underline hover:no-underline"
+                >
+                  Ver Lotes
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

@@ -73,7 +73,7 @@ export async function completarOrden(
   const orden_id = (formData.get('orden_id') as string)?.trim()
   const actual_quantity = parseFloat((formData.get('actual_quantity') as string) ?? '')
   const waste_quantityStr = (formData.get('waste_quantity') as string)?.trim()
-  const waste_quantity = waste_quantityStr !== '' ? parseFloat(waste_quantityStr) : 0
+  const waste_quantity = parseFloat(waste_quantityStr ?? '') || 0
   const waste_notes = (formData.get('waste_notes') as string)?.trim()
 
   if (!orden_id || Number.isNaN(actual_quantity) || actual_quantity <= 0) {
@@ -159,14 +159,15 @@ export async function completarOrden(
   }
 
   // Paso D: INSERT inventory_lots y guardar id del lote
+  const cantidadNeta = actual_quantity - waste_quantity
   const { data: nuevoLote, error: errLote } = await supabase
     .from('inventory_lots')
     .insert({
       product_id,
       lot_number: `LOTE-${Date.now()}`,
       production_date: new Date().toISOString(),
-      initial_quantity: actual_quantity,
-      current_quantity: actual_quantity,
+      initial_quantity: cantidadNeta,
+      current_quantity: cantidadNeta,
       committed_quantity: 0,
       notes: `Orden de producción completada`,
     })
@@ -187,7 +188,7 @@ export async function completarOrden(
     lot_id: nuevoLote.id,
     product_id: product_id,
     movement_type: 'entrada',
-    quantity: actual_quantity,
+    quantity: cantidadNeta,
     notes: 'Orden de producción completada',
   })
 

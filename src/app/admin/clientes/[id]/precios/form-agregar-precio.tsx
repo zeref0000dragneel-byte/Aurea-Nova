@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,19 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { agregarPrecioCliente } from './actions'
+
+function BotonAgregarPrecio({ disabledWhen }: { disabledWhen: boolean }) {
+  const { pending } = useFormStatus()
+  return (
+    <Button
+      type="submit"
+      disabled={pending || disabledWhen}
+      className="bg-amber-500 font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+    >
+      {pending ? 'Agregando...' : 'Agregar Precio'}
+    </Button>
+  )
+}
 
 type Producto = {
   id: string
@@ -160,13 +173,7 @@ export function FormAgregarPrecio({ customerId, productos }: Props) {
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={!productId}
-        className="bg-amber-500 font-medium text-white hover:bg-amber-600 disabled:opacity-50"
-      >
-        Agregar Precio
-      </Button>
+      <BotonAgregarPrecio disabledWhen={!productId} />
     </form>
   )
 }

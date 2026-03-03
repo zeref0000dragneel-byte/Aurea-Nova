@@ -61,6 +61,15 @@ aurea-flow/
     │   │   │   └── lotes/
     │   │   │       ├── page.tsx      # Inventario producto terminado (FIFO, filtro producto)
     │   │   │       └── form-filter-producto-lotes.tsx
+    │   │   ├── compras/
+    │   │   │   ├── page.tsx          # Listado compras (createAdminClient); cards resumen; filtro recepción; columna Recepción; deuda por proveedor
+    │   │   │   ├── actions.ts       # registrarCompra, registrarPagoProveedor, registrarRecepcion, cancelarCompra, actualizarNotasRecepcion
+    │   │   │   ├── nuevo/
+    │   │   │   │   ├── page.tsx
+    │   │   │   │   └── form-nueva-compra.tsx
+    │   │   │   └── [id]/
+    │   │   │       ├── page.tsx     # Detalle compra (createAdminClient); carga compra + pagos
+    │   │   │       └── detalle-compra.tsx  # Cabecera, detalle, recepción, historial pagos; resumen financiero; registrar pago; cancelar compra
     │   │   ├── clientes/
     │   │   │   ├── page.tsx
     │   │   │   ├── actions.ts
@@ -171,13 +180,14 @@ aurea-flow/
 |------|-------------|
 | `/` | Página raíz; redirige por rol o a login |
 | `/login` | Login (layout auth) |
-| `/admin/dashboard` | Dashboard operativo: métricas (órdenes activas, MP en alerta, lotes en stock, lotes por vencer), tablas de alerta, links Ver Producción / Ver Inventario |
+| `/admin/dashboard` | Dashboard operativo: 4 cards métricas + Resumen Financiero (deuda proveedores, por cobrar clientes) + Alertas Operativas; tablas MP en alerta y lotes por vencer; links Ver Producción / Ver Inventario |
 | `/admin/productos` | Lista productos; nuevo en `/admin/productos/nuevo`; editar en `/admin/productos/[id]/editar` |
 | `/admin/inventario` | Lista materias primas; link "Ver Lotes"; nuevo/editar en subrutas |
 | `/admin/inventario/lotes` | Inventario de producto terminado (lotes FIFO, filtro por producto, estado Disponible/Agotado/Por vencer) |
 | `/admin/clientes` | Lista clientes; nuevo/editar análogos |
 | `/admin/configuracion` | Configuración (categorías); editar en `/admin/configuracion/categorias/[id]/editar` |
-| `/admin/pedidos` | Placeholder |
+| `/admin/compras` | Listado compras a proveedores (filtro recepción); nueva en `/admin/compras/nuevo`; detalle en `/admin/compras/[id]` (recepción, pagos, cancelar) |
+| `/admin/pedidos` | Pedidos (listado, nuevo, detalle) |
 | `/admin/produccion` | Listado órdenes de producción (filtros); nueva en `/admin/produccion/nuevo`; detalle en `/admin/produccion/[id]` |
 | `/empleado/pedidos` | Pedidos empleado |
 | `/empleado/produccion` | Listado órdenes producción empleado; detalle en `/empleado/produccion/[id]` |
@@ -190,10 +200,11 @@ aurea-flow/
 | Área | Contenido principal |
 |------|---------------------|
 | `app/(auth)/login` | Login, actions para autenticar y redirigir por rol |
-| `app/admin/dashboard` | 4 cards métricas, tablas MP en alerta y lotes por vencer, links Ver Producción / Ver Inventario |
+| `app/admin/dashboard` | 4 cards métricas + Resumen Financiero (deuda proveedores, por cobrar clientes) + Alertas Operativas; tablas MP en alerta y lotes por vencer; links Ver Producción / Ver Inventario |
 | `app/admin/productos` | CRUD productos (listado, nuevo, editar, actions, botón eliminar) |
 | `app/admin/inventario` | CRUD materias primas; link a lotes; `lotes/` = inventario producto terminado (FIFO, filtro producto) |
-| `app/admin/produccion` | Listado órdenes (filtros, products(name), assigned_profile full_name); nueva orden; detalle [id] con consumos MP (planned_quantity), agregar/eliminar consumo, completar orden (inventory_lots, inventory_movements) |
+| `app/admin/compras` | Listado compras (createAdminClient); cards resumen + filtro recepción; tabla con Recepción; deuda por proveedor; nuevo/detalle (recepción, pagos, cancelar) |
+| `app/admin/produccion` | Listado órdenes (filtros, products(name), assigned_profile full_name); nueva orden; detalle [id] con consumos MP, completar orden (inventory_lots, inventory_movements) |
 | `app/admin/clientes` | CRUD clientes |
 | `app/admin/configuracion` | Categorías: listado, crear inline, editar/eliminar en subruta |
 | `app/empleado/produccion` | Listado y detalle órdenes; poner en proceso; agregar consumo y completar (reusa componentes/actions de admin) |

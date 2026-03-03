@@ -1,10 +1,19 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useFormState } from 'react-dom'
+import { useFormState, useFormStatus } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { crearCategoria } from './actions'
+
+function BotonAgregarCategoria() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" className="shrink-0 bg-amber-500 font-medium text-white hover:bg-amber-600" disabled={pending}>
+      {pending ? 'Agregando...' : 'Agregar'}
+    </Button>
+  )
+}
 
 export function FormCrearCategoriaInline() {
   const [state, formAction] = useFormState(crearCategoria, null)
@@ -45,9 +54,7 @@ export function FormCrearCategoriaInline() {
           className="bg-white"
         />
       </div>
-      <Button type="submit" className="shrink-0 bg-amber-500 font-medium text-white hover:bg-amber-600">
-        Agregar
-      </Button>
+      <BotonAgregarCategoria />
       {state?.error && (
         <p className="w-full text-sm text-red-600" role="alert">
           {state.error}

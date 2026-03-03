@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export type ConfirmarEntregaState = { success?: boolean; error?: string }
@@ -27,7 +28,7 @@ export async function confirmarEntregaCliente(
 
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select('id, customer_id, confirmed_by_employee, confirmed_by_customer')
+    .select('id, customer_id, confirmed_by_employee, confirmed_by_customer, status')
     .eq('id', order_id)
     .single()
 
@@ -43,6 +44,51 @@ export async function confirmarEntregaCliente(
   if (order.confirmed_by_employee === true) {
     update.status = 'entregado'
     update.confirmed_at = new Date().toISOString()
+
+    // Solo ejecutar cierre si el pedido NO está ya entregado (evita descontar inventario dos veces)
+    if (order.status !== 'entregado') {
+      const adminSupabase = createAdminClient()
+      const { data: items, error: itemsError } = await adminSupabase
+        .from('order_items')
+        .select('id, lot_id, product_id, quantity, unit_price')
+        .eq('order_id', order_id)
+
+      if (itemsError) return { error: itemsError.message }
+      if (items?.length) {
+        for (const item of items) {
+          const { data: lot, error: lotError } = await adminSupabase
+            .from('inventory_lots')
+            .select('current_quantity, committed_quantity')
+            .eq('id', item.lot_id)
+            .single()
+
+          if (lotError || !lot) return { error: 'Lote no encontrado para el ítem del pedido' }
+
+          const { error: updateLotError } = await adminSupabase
+            .from('inventory_lots')
+            .update({
+              current_quantity: lot.current_quantity - item.quantity,
+              committed_quantity: Math.max(0, (lot.committed_quantity ?? 0) - item.quantity),
+            })
+            .eq('id', item.lot_id)
+
+          if (updateLotError) return { error: updateLotError.message }
+
+          const { error: movError } = await adminSupabase.from('inventory_movements').insert({
+            lot_id: item.lot_id,
+            product_id: item.product_id,
+            movement_type: 'salida',
+            quantity: item.quantity,
+            unit_cost: item.unit_price,
+            reference_id: order_id,
+            reference_type: 'order',
+            notes: `Entrega pedido ${order_id}`,
+            created_by: user.id,
+          })
+          if (movError) return { error: movError.message }
+        }
+      }
+    }
   }
 
   const { error: updateError } = await supabase
