@@ -38,12 +38,10 @@ export async function confirmarEntregaCliente(
   const update: {
     confirmed_by_customer: boolean
     status?: string
-    confirmed_at?: string
   } = { confirmed_by_customer: true }
 
   if (order.confirmed_by_employee === true) {
     update.status = 'entregado'
-    update.confirmed_at = new Date().toISOString()
 
     // Solo ejecutar cierre si el pedido NO está ya entregado (evita descontar inventario dos veces)
     if (order.status !== 'entregado') {

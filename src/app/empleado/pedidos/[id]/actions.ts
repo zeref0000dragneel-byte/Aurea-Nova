@@ -68,10 +68,7 @@ export async function confirmarEntregaEmpleado(prevState: unknown, formData: For
 
     const { error: updateError } = await supabase
       .from('orders')
-      .update({
-        status: 'entregado',
-        confirmed_at: new Date().toISOString(),
-      })
+      .update({ status: 'entregado' })
       .eq('id', order_id)
 
     if (updateError) return { error: updateError.message }
