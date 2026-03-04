@@ -48,7 +48,9 @@ export default async function EmpleadoPedidosPage({
   if (filtroStatus !== 'todos') {
     query = query.eq('status', filtroStatus)
   } else {
-    query = query.not('status', 'in', ['borrador', 'cancelado'])
+    query = query
+      .not('status', 'eq', 'borrador')
+      .not('status', 'eq', 'cancelado')
   }
 
   const { data: pedidosData } = await query

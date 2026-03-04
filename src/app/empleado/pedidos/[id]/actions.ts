@@ -9,6 +9,14 @@ export async function confirmarEntregaEmpleado(prevState: unknown, formData: For
 
   const supabase = createAdminClient()
 
+  // Primero actualizar confirmed_by_employee; luego leer estado fresco para evitar race condition
+  const { error: updateEmpError } = await supabase
+    .from('orders')
+    .update({ confirmed_by_employee: true })
+    .eq('id', order_id)
+
+  if (updateEmpError) return { error: updateEmpError.message }
+
   const { data: order, error: fetchError } = await supabase
     .from('orders')
     .select('confirmed_by_customer, status')
@@ -16,11 +24,6 @@ export async function confirmarEntregaEmpleado(prevState: unknown, formData: For
     .single()
 
   if (fetchError || !order) return { error: fetchError?.message ?? 'Pedido no encontrado' }
-
-  await supabase
-    .from('orders')
-    .update({ confirmed_by_employee: true })
-    .eq('id', order_id)
 
   if (order.confirmed_by_customer === true) {
     // Solo ejecutar cierre si el pedido NO está ya entregado (evita descontar inventario dos veces)
