@@ -49,16 +49,16 @@ function getPaymentBadgeClass(payment_status: string): string {
 type NextState = { value: string; label: string }
 
 function getNextStates(current: string): NextState[] {
+  // Admin solo puede hasta listo; entregado lo asigna el sistema (empleado + cliente confirman)
   const all: NextState[] = [
     { value: 'en_preparacion', label: statusLabel.en_preparacion },
     { value: 'listo', label: statusLabel.listo },
-    { value: 'entregado', label: statusLabel.entregado },
     { value: 'cancelado', label: statusLabel.cancelado },
   ]
   if (current === 'borrador') return [{ value: 'cancelado', label: statusLabel.cancelado }]
-  if (current === 'confirmado') return [all[0], all[3]]
-  if (current === 'en_preparacion') return [all[1], all[3]]
-  if (current === 'listo') return [all[2], all[3]]
+  if (current === 'confirmado') return [all[0], all[2]]
+  if (current === 'en_preparacion') return [all[1], all[2]]
+  if (current === 'listo') return [all[2]]
   return []
 }
 

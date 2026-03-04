@@ -187,11 +187,15 @@ export async function confirmarPedido(prevState: unknown, formData: FormData) {
 
 // ─── ACTUALIZAR ESTADO ────────────────────────────────────────────────────────
 export async function actualizarEstadoPedido(prevState: unknown, formData: FormData) {
-  const supabase = createAdminClient()
   const order_id = formData.get('order_id') as string
   const status = formData.get('status') as string
 
-  const statusValidos = ['en_preparacion', 'listo', 'entregado', 'cancelado']
+  if (status === 'entregado') {
+    return { error: 'El estado entregado se asigna automáticamente cuando empleado y cliente confirman la entrega.' }
+  }
+
+  const supabase = createAdminClient()
+  const statusValidos = ['en_preparacion', 'listo', 'cancelado']
   if (!statusValidos.includes(status)) return { error: 'Estado inválido' }
 
   // Si se cancela: liberar committed_quantity de los lotes
@@ -222,67 +226,7 @@ export async function actualizarEstadoPedido(prevState: unknown, formData: FormD
     }
   }
 
-  // Si se entrega: descontar current_quantity y registrar movimiento salida
-  if (status === 'entregado') {
-    const { data: items } = await supabase
-      .from('order_items')
-      .select('lot_id, product_id, quantity, unit_price')
-      .eq('order_id', order_id)
-      .not('lot_id', 'is', null)
-
-    if (items) {
-      for (const item of items) {
-        const { data: lote } = await supabase
-          .from('inventory_lots')
-          .select('current_quantity, committed_quantity')
-          .eq('id', item.lot_id)
-          .single()
-
-        if (lote) {
-          await supabase
-            .from('inventory_lots')
-            .update({
-              current_quantity: Math.max(0, Number(lote.current_quantity) - Number(item.quantity)),
-              committed_quantity: Math.max(0, Number(lote.committed_quantity) - Number(item.quantity)),
-            })
-            .eq('id', item.lot_id)
-
-          // Registrar movimiento de salida
-          await supabase.from('inventory_movements').insert({
-            lot_id: item.lot_id,
-            product_id: item.product_id,
-            movement_type: 'salida',
-            quantity: item.quantity,
-            unit_cost: item.unit_price,
-            reference_id: order_id,
-            reference_type: 'order',
-            notes: `Entrega pedido`,
-          })
-        }
-      }
-    }
-
-    // Marcar confirmed_by_employee y confirmed_at
-    await supabase
-      .from('orders')
-      .update({
-        status: 'entregado',
-        confirmed_by_employee: true,
-        confirmed_at: new Date().toISOString(),
-      })
-      .eq('id', order_id)
-
-    await sendTelegram(
-      `🚚 <b>Pedido Entregado</b>\n` +
-        `📋 Orden ID: ${order_id}\n` +
-        `✅ Marcado como entregado\n` +
-        `📅 ${new Date().toLocaleString('es-MX')}`
-    )
-    revalidatePath('/admin/pedidos')
-    revalidatePath(`/admin/pedidos/${order_id}`)
-    return { success: true }
-  }
-
+  // (entregado ya no se asigna desde admin; se rechaza al inicio)
   const { error } = await supabase
     .from('orders')
     .update({ status })
