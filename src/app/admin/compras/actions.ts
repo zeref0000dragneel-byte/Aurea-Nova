@@ -289,7 +289,7 @@ export async function registrarRecepcion(
   if (errPaymentUpdate) return { error: errPaymentUpdate.message }
 
   revalidatePath('/admin/compras')
-  revalidatePath('/admin/compras/' + purchase_id)
+  revalidatePath(`/admin/compras/${purchase_id}`)
   return { success: true, mensaje: 'Recepción registrada. Stock actualizado.' }
 }
 

@@ -57,6 +57,18 @@ export function FormCompletarOrden({
             className="border-gray-200"
           />
         </div>
+        <div className="grid gap-2">
+          <Label htmlFor="expiry_date">Fecha de vencimiento del lote (opcional)</Label>
+          <Input
+            id="expiry_date"
+            name="expiry_date"
+            type="date"
+            className="border-gray-200"
+          />
+          <p className="text-xs text-muted-foreground">
+            Dejar vacío si el producto no tiene fecha de vencimiento
+          </p>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="waste_quantity">Merma</Label>
           <Input

@@ -75,6 +75,7 @@ export async function completarOrden(
   const waste_quantityStr = (formData.get('waste_quantity') as string)?.trim()
   const waste_quantity = parseFloat(waste_quantityStr ?? '') || 0
   const waste_notes = (formData.get('waste_notes') as string)?.trim()
+  const expiry_date = formData.get('expiry_date') as string | null
 
   if (!orden_id || Number.isNaN(actual_quantity) || actual_quantity <= 0) {
     return { error: 'orden_id y actual_quantity son requeridos y deben ser mayor que 0' }
@@ -169,6 +170,7 @@ export async function completarOrden(
       initial_quantity: cantidadNeta,
       current_quantity: cantidadNeta,
       committed_quantity: 0,
+      expiry_date: expiry_date && expiry_date.trim() !== '' ? expiry_date : null,
       notes: `Orden de producción completada`,
     })
     .select('id')
