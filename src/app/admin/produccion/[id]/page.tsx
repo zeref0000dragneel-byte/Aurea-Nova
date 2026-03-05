@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
@@ -114,7 +115,6 @@ export default async function OrdenProduccionDetallePage({
         year: 'numeric',
       })
     : '—'
-  const canComplete = status === 'pendiente' || status === 'en_proceso'
   const isFinished = status === 'completada' || status === 'cancelada'
   const puedeEditar = status !== 'completada' && status !== 'cancelada'
 
@@ -328,10 +328,12 @@ export default async function OrdenProduccionDetallePage({
                       rel="noopener noreferrer"
                       className="inline-block rounded-lg border border-gray-200 overflow-hidden max-w-xs"
                     >
-                      <img
+                      <Image
                         src={orden.waste_photo_url}
                         alt="Foto de merma"
-                        className="h-auto w-full object-cover"
+                        width={400}
+                        height={300}
+                        className="rounded-lg object-cover"
                       />
                     </a>
                   </div>

@@ -1,9 +1,9 @@
-# Estructura del proyecto Aurea Flow
+# Estructura del proyecto Aurea Flow (Colmena-OS)
 
-Estructura actual del proyecto. Excluye `node_modules/`, `.next/`, `.git/`. Las rutas de admin incluyen listados, formularios nuevo/editar y Server Actions donde aplica.
+Estructura actual del proyecto. Raíz: repositorio Colmena-OS. Excluye `node_modules/`, `.next/`, `.git/`. Las rutas de admin incluyen listados, formularios nuevo/editar y Server Actions donde aplica.
 
 ```
-aurea-flow/
+(raíz Colmena-OS)/
 ├── .env.local
 ├── .eslintrc.json
 ├── .gitignore
@@ -18,6 +18,7 @@ aurea-flow/
 ├── README.md
 ├── tailwind.config.ts
 ├── tsconfig.json
+├── vercel.json
 │
 └── src/
     ├── middleware.ts
@@ -27,6 +28,9 @@ aurea-flow/
     │   ├── globals.css
     │   ├── layout.tsx
     │   ├── page.tsx
+    │   ├── fonts/
+    │   │   ├── GeistMonoVF.woff
+    │   │   └── GeistVF.woff
     │   │
     │   ├── (auth)/
     │   │   ├── layout.tsx
@@ -36,8 +40,12 @@ aurea-flow/
     │   │
     │   ├── admin/
     │   │   ├── layout.tsx
+    │   │   ├── loading.tsx
     │   │   ├── dashboard/
     │   │   │   └── page.tsx          # Dashboard operativo (métricas, alertas, links)
+    │   │   ├── finanzas/
+    │   │   │   ├── page.tsx
+    │   │   │   └── dashboard-financiero.tsx
     │   │   ├── productos/
     │   │   │   ├── page.tsx
     │   │   │   ├── actions.ts
@@ -62,14 +70,14 @@ aurea-flow/
     │   │   │       ├── page.tsx      # Inventario producto terminado (FIFO, filtro producto)
     │   │   │       └── form-filter-producto-lotes.tsx
     │   │   ├── compras/
-    │   │   │   ├── page.tsx          # Listado compras (createAdminClient); cards resumen; filtro recepción; columna Recepción; deuda por proveedor
-    │   │   │   ├── actions.ts       # registrarCompra, registrarPagoProveedor, registrarRecepcion, cancelarCompra, actualizarNotasRecepcion
+    │   │   │   ├── page.tsx
+    │   │   │   ├── actions.ts
     │   │   │   ├── nuevo/
     │   │   │   │   ├── page.tsx
     │   │   │   │   └── form-nueva-compra.tsx
     │   │   │   └── [id]/
-    │   │   │       ├── page.tsx     # Detalle compra (createAdminClient); carga compra + pagos
-    │   │   │       └── detalle-compra.tsx  # Cabecera, detalle, recepción, historial pagos; resumen financiero; registrar pago; cancelar compra
+    │   │   │       ├── page.tsx
+    │   │   │       └── detalle-compra.tsx
     │   │   ├── clientes/
     │   │   │   ├── page.tsx
     │   │   │   ├── actions.ts
@@ -77,28 +85,51 @@ aurea-flow/
     │   │   │   │   ├── page.tsx
     │   │   │   │   └── form-cliente-nuevo.tsx
     │   │   │   └── [id]/
-    │   │   │       └── editar/
+    │   │   │       ├── editar/
+    │   │   │       │   ├── page.tsx
+    │   │   │       │   └── form-cliente-editar.tsx
+    │   │   │       └── precios/
     │   │   │           ├── page.tsx
-    │   │   │           └── form-cliente-editar.tsx
+    │   │   │           ├── actions.ts
+    │   │   │           ├── form-agregar-precio.tsx
+    │   │   │           └── tarjeta-precio.tsx
+    │   │   ├── usuarios/
+    │   │   │   ├── page.tsx
+    │   │   │   ├── actions.ts
+    │   │   │   ├── usuarios-content.tsx
+    │   │   │   ├── form-crear-empleado.tsx
+    │   │   │   ├── form-dar-acceso-cliente.tsx
+    │   │   │   └── boton-toggle-usuario.tsx
+    │   │   ├── pedidos/
+    │   │   │   ├── page.tsx          # Listado pedidos
+    │   │   │   ├── actions.ts
+    │   │   │   ├── nuevo/
+    │   │   │   │   ├── page.tsx
+    │   │   │   │   └── form-nuevo-pedido.tsx
+    │   │   │   └── [id]/
+    │   │   │       ├── page.tsx      # Detalle pedido
+    │   │   │       └── detalle-pedido.tsx
     │   │   ├── configuracion/
     │   │   │   ├── page.tsx
     │   │   │   ├── actions.ts
     │   │   │   ├── form-crear-categoria-inline.tsx
-    │   │   │   └── categorias/
-    │   │   │       └── [id]/
-    │   │   │           └── editar/
-    │   │   │               ├── page.tsx
-    │   │   │               └── form-categoria-editar.tsx
-    │   │   ├── pedidos/
-    │   │   │   └── .gitkeep
+    │   │   │   ├── categorias/
+    │   │   │   │   └── [id]/
+    │   │   │   │       └── editar/
+    │   │   │   │           ├── page.tsx
+    │   │   │   │           └── form-categoria-editar.tsx
+    │   │   │   └── telegram/
+    │   │   │       ├── page.tsx
+    │   │   │       ├── actions.ts
+    │   │   │       └── boton-test-telegram.tsx
     │   │   └── produccion/
-    │   │       ├── page.tsx          # Listado órdenes (filtros, asignado, productos)
-    │   │       ├── actions.ts        # crearOrdenProduccion, actualizarEstadoOrden, completarOrden, agregarConsumoMP, eliminarConsumoMP
+    │   │       ├── page.tsx
+    │   │       ├── actions.ts
     │   │       ├── nuevo/
     │   │       │   ├── page.tsx
     │   │       │   └── form-nueva-orden.tsx
     │   │       └── [id]/
-    │   │           ├── page.tsx     # Detalle orden: cabecera, consumos MP, completar/resumen
+    │   │           ├── page.tsx
     │   │           ├── boton-eliminar-consumo-mp.tsx
     │   │           ├── form-agregar-consumo-mp.tsx
     │   │           └── form-completar-orden.tsx
@@ -106,21 +137,33 @@ aurea-flow/
     │   ├── empleado/
     │   │   ├── layout.tsx
     │   │   ├── pedidos/
-    │   │   │   └── page.tsx
+    │   │   │   ├── page.tsx
+    │   │   │   └── [id]/
+    │   │   │       ├── page.tsx
+    │   │   │       ├── actions.ts
+    │   │   │       └── detalle-pedido-empleado.tsx
     │   │   └── produccion/
-    │   │       ├── page.tsx         # Listado órdenes para empleado
+    │   │       ├── page.tsx
     │   │       └── [id]/
-    │   │           ├── page.tsx     # Detalle orden (consumos, completar)
+    │   │           ├── page.tsx
     │   │           └── boton-poner-en-proceso.tsx
     │   │
-    │   └── cliente/
-    │       ├── layout.tsx
-    │       ├── dashboard/
-    │       │   └── page.tsx
-    │       ├── pedidos/
-    │       │   └── .gitkeep
-    │       └── precios/
-    │           └── .gitkeep
+    │   ├── cliente/
+    │   │   ├── layout.tsx
+    │   │   ├── dashboard/
+    │   │   │   └── page.tsx
+    │   │   ├── pedidos/
+    │   │   │   ├── page.tsx
+    │   │   │   └── [id]/
+    │   │   │       ├── page.tsx
+    │   │   │       ├── actions.ts
+    │   │   │       └── detalle-pedido-cliente.tsx
+    │   │   └── precios/
+    │   │       └── page.tsx
+    │   │
+    │   └── api/
+    │       └── alertas-stock/
+    │           └── route.ts
     │
     ├── components/
     │   ├── ui/
@@ -138,12 +181,19 @@ aurea-flow/
     │   │   ├── table.tsx
     │   │   ├── textarea.tsx
     │   │   ├── toast.tsx
-    │   │   └── toaster.tsx
+    │   │   ├── toaster.tsx
+    │   │   └── tooltip.tsx
     │   ├── admin/
+    │   │   ├── admin-sidebar.tsx
+    │   │   ├── admin-page-transition.tsx
+    │   │   ├── table-skeleton.tsx
+    │   │   ├── cards-skeleton.tsx
+    │   │   ├── empty-state.tsx
     │   │   ├── boton-eliminar-producto.tsx
     │   │   ├── boton-eliminar-categoria.tsx
     │   │   ├── boton-eliminar-cliente.tsx
     │   │   └── boton-eliminar-materia-prima.tsx
+    │   ├── boton-cerrar-sesion.tsx
     │   ├── empleado/
     │   │   └── .gitkeep
     │   ├── cliente/
@@ -153,6 +203,8 @@ aurea-flow/
     │
     ├── lib/
     │   ├── utils.ts
+    │   ├── telegram.ts
+    │   ├── rls-pedidos.sql
     │   ├── supabase/
     │   │   ├── client.ts
     │   │   ├── server.ts
@@ -180,36 +232,45 @@ aurea-flow/
 |------|-------------|
 | `/` | Página raíz; redirige por rol o a login |
 | `/login` | Login (layout auth) |
-| `/admin/dashboard` | Dashboard operativo: 4 cards métricas + Resumen Financiero (deuda proveedores, por cobrar clientes) + Alertas Operativas; tablas MP en alerta y lotes por vencer; links Ver Producción / Ver Inventario |
+| `/admin/dashboard` | Dashboard operativo: métricas, Resumen Financiero, Alertas Operativas; links Ver Producción / Ver Inventario / Compras |
+| `/admin/finanzas` | Dashboard financiero |
 | `/admin/productos` | Lista productos; nuevo en `/admin/productos/nuevo`; editar en `/admin/productos/[id]/editar` |
 | `/admin/inventario` | Lista materias primas; link "Ver Lotes"; nuevo/editar en subrutas |
-| `/admin/inventario/lotes` | Inventario de producto terminado (lotes FIFO, filtro por producto, estado Disponible/Agotado/Por vencer) |
-| `/admin/clientes` | Lista clientes; nuevo/editar análogos |
+| `/admin/inventario/lotes` | Inventario de producto terminado (lotes FIFO, filtro por producto) |
+| `/admin/compras` | Listado compras; nueva en `/admin/compras/nuevo`; detalle en `/admin/compras/[id]` |
+| `/admin/clientes` | Lista clientes; nuevo/editar; precios por cliente en `/admin/clientes/[id]/precios` |
+| `/admin/usuarios` | Gestión de usuarios (empleados, dar acceso cliente, toggle activo) |
+| `/admin/pedidos` | Listado pedidos; nuevo en `/admin/pedidos/nuevo`; detalle en `/admin/pedidos/[id]` |
 | `/admin/configuracion` | Configuración (categorías); editar en `/admin/configuracion/categorias/[id]/editar` |
-| `/admin/compras` | Listado compras a proveedores (filtro recepción); nueva en `/admin/compras/nuevo`; detalle en `/admin/compras/[id]` (recepción, pagos, cancelar) |
-| `/admin/pedidos` | Pedidos (listado, nuevo, detalle) |
-| `/admin/produccion` | Listado órdenes de producción (filtros); nueva en `/admin/produccion/nuevo`; detalle en `/admin/produccion/[id]` |
-| `/empleado/pedidos` | Pedidos empleado |
+| `/admin/configuracion/telegram` | Configuración Telegram (notificaciones) |
+| `/admin/produccion` | Listado órdenes de producción; nueva en `/admin/produccion/nuevo`; detalle en `/admin/produccion/[id]` |
+| `/empleado/pedidos` | Listado pedidos empleado; detalle en `/empleado/pedidos/[id]` |
 | `/empleado/produccion` | Listado órdenes producción empleado; detalle en `/empleado/produccion/[id]` |
 | `/cliente/dashboard` | Dashboard cliente |
-| `/cliente/pedidos` | Placeholder |
-| `/cliente/precios` | Placeholder |
+| `/cliente/pedidos` | Listado pedidos del cliente; detalle en `/cliente/pedidos/[id]` |
+| `/cliente/precios` | Precios para el cliente |
 
 ## Resumen por área
 
 | Área | Contenido principal |
 |------|---------------------|
 | `app/(auth)/login` | Login, actions para autenticar y redirigir por rol |
-| `app/admin/dashboard` | 4 cards métricas + Resumen Financiero (deuda proveedores, por cobrar clientes) + Alertas Operativas; tablas MP en alerta y lotes por vencer; links Ver Producción / Ver Inventario |
-| `app/admin/productos` | CRUD productos (listado, nuevo, editar, actions, botón eliminar) |
-| `app/admin/inventario` | CRUD materias primas; link a lotes; `lotes/` = inventario producto terminado (FIFO, filtro producto) |
-| `app/admin/compras` | Listado compras (createAdminClient); cards resumen + filtro recepción; tabla con Recepción; deuda por proveedor; nuevo/detalle (recepción, pagos, cancelar) |
-| `app/admin/produccion` | Listado órdenes (filtros, products(name), assigned_profile full_name); nueva orden; detalle [id] con consumos MP, completar orden (inventory_lots, inventory_movements) |
-| `app/admin/clientes` | CRUD clientes |
-| `app/admin/configuracion` | Categorías: listado, crear inline, editar/eliminar en subruta |
-| `app/empleado/produccion` | Listado y detalle órdenes; poner en proceso; agregar consumo y completar (reusa componentes/actions de admin) |
-| `app/cliente` | Dashboard; pedidos y precios placeholder |
-| `components/ui` | Componentes shadcn (botones, tablas, inputs, cards, etc.) |
-| `components/admin` | Botones eliminar (producto, categoría, cliente, materia prima) |
-| `lib/supabase` | client (navegador), server (RSC), admin (service role para actions), middleware |
-| `types` | database.ts con tipos (Profile, Customer, Product, ProductCategory, Order, production_orders, inventory_lots, etc.) |
+| `app/admin/dashboard` | Métricas, Resumen Financiero, Alertas Operativas; links Producción, Inventario, Compras |
+| `app/admin/finanzas` | Dashboard financiero |
+| `app/admin/productos` | CRUD productos |
+| `app/admin/inventario` | CRUD materias primas; lotes = inventario producto terminado (FIFO) |
+| `app/admin/compras` | Listado, nueva compra, detalle (recepción, pagos, cancelar) |
+| `app/admin/clientes` | CRUD clientes; precios por cliente en `[id]/precios` |
+| `app/admin/usuarios` | Usuarios: crear empleado, dar acceso cliente, activar/desactivar |
+| `app/admin/pedidos` | Listado, nuevo pedido, detalle |
+| `app/admin/configuracion` | Categorías; subruta `telegram` para notificaciones |
+| `app/admin/produccion` | Órdenes de producción (listado, nueva, detalle con consumos MP, completar) |
+| `app/empleado/pedidos` | Listado y detalle pedidos |
+| `app/empleado/produccion` | Listado y detalle órdenes; poner en proceso; consumos y completar |
+| `app/cliente` | Dashboard; pedidos (listado y detalle); precios |
+| `app/api/alertas-stock` | API route para alertas de stock |
+| `components/ui` | Componentes shadcn (incluye tooltip) |
+| `components/admin` | Sidebar, skeletons, empty-state, botones eliminar |
+| `lib/supabase` | client, server, admin, middleware |
+| `lib/telegram.ts` | Integración Telegram |
+| `types` | database.ts |
