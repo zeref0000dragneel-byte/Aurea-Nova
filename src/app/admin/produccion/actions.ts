@@ -287,6 +287,23 @@ export async function agregarConsumoMP(
     return { error: 'No se puede modificar una orden completada o cancelada' }
   }
 
+  const { data: mp } = await supabase
+    .from('raw_materials')
+    .select('name, current_stock, unit')
+    .eq('id', raw_material_id)
+    .single()
+
+  if (!mp) {
+    return { error: 'Materia prima no encontrada' }
+  }
+
+  const stockActual = mp.current_stock ?? 0
+  if (stockActual < planned_quantity) {
+    return {
+      error: `Stock insuficiente de ${mp.name}. Disponible: ${stockActual} ${mp.unit ?? ''}, solicitado: ${planned_quantity} ${mp.unit ?? ''}`,
+    }
+  }
+
   const { error } = await supabase.from('production_raw_material_usage').insert({
     production_order_id,
     raw_material_id,
