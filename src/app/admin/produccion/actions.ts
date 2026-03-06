@@ -71,6 +71,8 @@ export async function completarOrden(
   prevState: unknown,
   formData: FormData
 ): Promise<{ error?: string }> {
+  console.log('waste_photo_url recibido:', formData.get('waste_photo_url'))
+  console.log('waste_photo_file recibido:', formData.get('waste_photo_file'))
   const orden_id = (formData.get('orden_id') as string)?.trim()
   const actual_quantity = parseFloat((formData.get('actual_quantity') as string) ?? '')
   const waste_quantityStr = (formData.get('waste_quantity') as string)?.trim()
