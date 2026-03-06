@@ -88,14 +88,14 @@ export async function completarOrden(
 
   // Foto de merma: subir archivo si se envió
   let waste_photo_url = (formData.get('waste_photo_url') as string)?.trim() || null
-  const file = formData.get('waste_photo') as File | null
+  const file = formData.get('waste_photo_file') as File | null
   if (file && file.size > 0) {
     try {
       const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
       const path = `${orden_id}/${Date.now()}.${ext}`
-      const { data, error } = await supabase.storage.from('waste-photos').upload(path, file, { upsert: true })
+      const { data, error } = await supabase.storage.from('mermas').upload(path, file, { upsert: true })
       if (!error && data?.path) {
-        const { data: urlData } = supabase.storage.from('waste-photos').getPublicUrl(data.path)
+        const { data: urlData } = supabase.storage.from('mermas').getPublicUrl(data.path)
         waste_photo_url = urlData.publicUrl
       }
     } catch {

@@ -1,32 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useState, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { completarOrden } from '@/app/admin/produccion/actions'
-
-function SubmitButton({
-  isUploading,
-  puedeSubmit,
-}: {
-  isUploading: boolean
-  puedeSubmit: boolean
-}) {
-  const { pending } = useFormStatus()
-  const disabled = !puedeSubmit || isUploading || pending
-  return (
-    <Button
-      type="submit"
-      disabled={disabled}
-      className="bg-emerald-600 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
-    >
-      {isUploading ? 'Subiendo imagen...' : pending ? 'Completando…' : 'Completar Orden'}
-    </Button>
-  )
-}
 
 export function FormCompletarOrden({
   ordenId,
@@ -35,90 +15,104 @@ export function FormCompletarOrden({
   ordenId: string
   hasConsumos?: boolean
 }) {
+  const formRef = useRef<HTMLFormElement>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
-  const [wastePhotoUrl, setWastePhotoUrl] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [state, formAction] = useFormState(completarOrden, null)
-  const error = state && typeof state === 'object' && 'error' in state ? (state as { error: string }).error : null
+  const [uploadComplete, setUploadComplete] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const archivoSeleccionado = !!selectedFile
-  const puedeSubmit = !isUploading && (!archivoSeleccionado || wastePhotoUrl !== '')
+  const puedeSubmit = !isUploading && (!archivoSeleccionado || uploadComplete)
 
-  const subirImagenConProgreso = (file: File, path: string): Promise<string> => {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    if (!base || !anonKey) return Promise.reject(new Error('Configuración de Supabase faltante'))
+  const handleSubmit = async () => {
+    if (!formRef.current || isSubmitting) return
+    setIsSubmitting(true)
+    setError(null)
 
-    return new Promise((resolve, reject) => {
-      const url = `${base}/storage/v1/object/waste-photos/${path}`
-      const xhr = new XMLHttpRequest()
+    const fd = new FormData(formRef.current)
 
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const pct = Math.round((e.loaded / e.total) * 100)
-          setUploadProgress(pct)
-        }
-      }
+    const hiddenInput = document.getElementById('waste_photo_url_hidden') as HTMLInputElement
+    const photoUrl = hiddenInput?.value ?? ''
+    fd.set('waste_photo_url', photoUrl)
 
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const publicUrl = `${base}/storage/v1/object/public/waste-photos/${path}`
-          resolve(publicUrl)
-        } else {
-          reject(new Error('Error al subir imagen'))
-        }
-      }
+    console.log('Enviando waste_photo_url:', photoUrl)
 
-      xhr.onerror = () => reject(new Error('Error de red'))
+    const result = await completarOrden(null, fd)
 
-      xhr.open('POST', url)
-      xhr.setRequestHeader('Authorization', `Bearer ${anonKey}`)
-      xhr.setRequestHeader('x-upsert', 'true')
-
-      xhr.send(file)
-    })
+    if (result?.error) {
+      setError(result.error)
+      setIsSubmitting(false)
+    }
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || file.size === 0) {
       setSelectedFile(null)
-      setWastePhotoUrl('')
+      setUploadComplete(false)
       setUploadProgress(0)
+      const hiddenInput = document.getElementById('waste_photo_url_hidden') as HTMLInputElement
+      if (hiddenInput) hiddenInput.value = ''
       return
     }
     setSelectedFile(file)
-    setWastePhotoUrl('')
+    setUploadComplete(false)
+    const supabase = createClient()
     setIsUploading(true)
-    setUploadProgress(0)
+    setUploadProgress(10)
+
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
     const path = `${ordenId}/${Date.now()}.${ext}`
 
-    try {
-      const publicUrl = await subirImagenConProgreso(file, path)
-      setWastePhotoUrl(publicUrl)
-    } catch {
-      setUploadProgress(0)
+    setUploadProgress(40)
+
+    const { data, error } = await supabase.storage
+      .from('mermas')
+      .upload(path, file, { upsert: true })
+
+    setUploadProgress(80)
+
+    if (error) {
+      console.error('Error subida:', error)
       setSelectedFile(null)
-    } finally {
       setIsUploading(false)
+      setUploadProgress(0)
+      const hiddenInput = document.getElementById('waste_photo_url_hidden') as HTMLInputElement
+      if (hiddenInput) hiddenInput.value = ''
+      return
     }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('mermas')
+      .getPublicUrl(data.path)
+
+    setUploadProgress(100)
+
+    const hiddenInput = document.getElementById('waste_photo_url_hidden') as HTMLInputElement
+    if (hiddenInput) hiddenInput.value = publicUrl
+    console.log('URL guardada:', publicUrl)
+
+    setUploadComplete(true)
+    setIsUploading(false)
   }
 
   return (
     <form
-      action={formAction}
+      ref={formRef}
       encType="multipart/form-data"
       className="space-y-6"
+      onSubmit={(e) => e.preventDefault()}
     >
       <input type="hidden" name="orden_id" value={ordenId} />
-      <input type="hidden" name="waste_photo_url" value={wastePhotoUrl} />
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {error}
-        </div>
-      )}
+      <input
+        type="hidden"
+        name="waste_photo_url"
+        id="waste_photo_url_hidden"
+        defaultValue=""
+      />
+      {error && <p className="text-red-600 text-sm">{error}</p>}
       {!hasConsumos && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
           No hay materias primas registradas. Agrega al menos un consumo antes de completar la orden.
@@ -199,7 +193,14 @@ export function FormCompletarOrden({
           )}
         </div>
       </div>
-      <SubmitButton isUploading={isUploading} puedeSubmit={puedeSubmit} />
+      <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={!puedeSubmit || isUploading || isSubmitting}
+        className="bg-emerald-600 font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+      >
+        {isUploading ? 'Subiendo imagen...' : isSubmitting ? 'Completando…' : 'Completar Orden'}
+      </Button>
     </form>
   )
 }
