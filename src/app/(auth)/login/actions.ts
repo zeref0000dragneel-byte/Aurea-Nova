@@ -56,3 +56,45 @@ export async function logoutAction() {
   await supabase.auth.signOut()
   redirect('/login')
 }
+
+export async function loginDemo(
+  _prevState: { error: string } | null,
+  formData: FormData
+): Promise<{ error: string } | null> {
+  const rol = formData.get('rol') as string
+
+  const credenciales: Record<string, { email: string; password: string; redirectTo: string }> = {
+    admin: {
+      email: process.env.DEMO_ADMIN_EMAIL ?? '',
+      password: process.env.DEMO_PASSWORD ?? '',
+      redirectTo: '/admin/dashboard',
+    },
+    empleado: {
+      email: process.env.DEMO_EMPLEADO_EMAIL ?? '',
+      password: process.env.DEMO_PASSWORD ?? '',
+      redirectTo: '/empleado/produccion',
+    },
+    cliente: {
+      email: process.env.DEMO_CLIENTE_EMAIL ?? '',
+      password: process.env.DEMO_PASSWORD ?? '',
+      redirectTo: '/cliente/dashboard',
+    },
+  }
+
+  const cred = credenciales[rol]
+  if (!cred) {
+    return { error: 'Rol de demo no válido' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword({
+    email: cred.email,
+    password: cred.password,
+  })
+
+  if (error) {
+    return { error: 'No se pudo iniciar la sesión demo. ' + error.message }
+  }
+
+  redirect(cred.redirectTo)
+}

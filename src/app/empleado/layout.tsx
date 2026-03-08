@@ -32,6 +32,9 @@ export default async function EmpleadoLayout({
 
   return (
     <div className="flex min-h-screen bg-transparent">
+      <div className="w-full bg-amber-400 text-amber-950 text-xs font-semibold text-center py-1.5 tracking-wide fixed top-0 left-0 z-50">
+        ⚡ MODO DEMO — Los datos pueden resetearse en cualquier momento
+      </div>
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 z-10 flex h-screen w-64 flex-col border-r border-[#FFE082]/20 bg-[#FEF9F2]/95 shadow-lg backdrop-blur-sm">
         <header className="flex items-center gap-3 px-4 py-5">

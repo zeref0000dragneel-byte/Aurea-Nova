@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { loginAction } from './actions'
+import { DemoButtons } from './demo-buttons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -119,6 +120,8 @@ export default function LoginPage() {
             </Button>
           </form>
         </div>
+
+        <DemoButtons />
 
         {/* Footer */}
         <p className="text-center text-xs text-neutral-500 mt-8 italic font-medium">
