@@ -45,7 +45,7 @@ export default function LoginPage() {
             HiveCore
           </h1>
           <p className="text-neutral-700/80 mt-2 text-sm font-medium">
-            HiveCore — Amor de Colmena
+            Sistema de gestión — Amor de Colmena
           </p>
         </div>
 
